@@ -212,7 +212,6 @@ def monomial_expansion(array,permutation = Permutation([1])):
 
     if len(array) != 0:
         help_fn(array,{permutation:1})
-    #return dict
     new_dict ={}
     for key,value in dict.items():
         if value !=0:

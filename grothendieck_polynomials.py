@@ -82,8 +82,13 @@ def grothendieck_coeff(polynomial):
         current = monomial_expansion(array)
         for key in current.keys():
             edit(key,current[key]*coeff,dict)
-
-    return dict
+    new_dict ={}
+    for key,value in dict.items():
+        if value !=0:
+            new_dict[key] = value
+   
+    
+    return new_dict 
 
 #grothendieck_coeff(Partition([1]).go_polynomial())
 #{ 2 1: 2,  3 1 2: 1}
