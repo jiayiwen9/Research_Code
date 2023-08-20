@@ -2,7 +2,7 @@ import numpy
 from itertools import chain, combinations
 
 class Permutation:
-    def __init__(self, array):
+    def __init__(self, array=[1]):
         # A dictionary is used to record the bijection
         self.map = {}
         self.array = array
@@ -13,6 +13,13 @@ class Permutation:
                 self.map[count+1] = array[count]
                 count -= 1
 
+    def inverse(self):
+        array = list(range(1, self.size() + 1))
+        for i in range(1, self.size() + 1):
+            a = self.evaluate(i)
+            array[a - 1] = i
+        return Permutation(array)
+
     def __repr__(self) -> str:
             #print the oneline notation of the permutation
             oneline = ''
@@ -20,12 +27,18 @@ class Permutation:
                 oneline += ' '+ str(num)
             return oneline
     
+    def copy(self):
+        return Permutation(self.array)
+
     def equal(self, other):
-        if self.array == other.array:
-            return True
-        else: 
-            return False
+        return self.array == other.array
+
+    def __eq__(self, other):
+        return self.equal(other)
     
+    def __hash__(self):
+        return hash(str(self))
+        
     # the image of a number under the permutation
     def evaluate(self, number):
     
@@ -114,6 +127,12 @@ class Permutation:
 
             return Permutation(new_perm)
 
+    def act_sequence(self, array):
+        temp = self.copy()
+        for i in array:
+            temp = temp.act(i)
+
+        return temp
     # a function to compute P_k(v) 
     # i.e. the set of all permutations of the form 
     # w = v (a_1,k )(a_2, k ) ... (a_p,k) (k,b_1)... (k,b_q)
@@ -161,22 +180,27 @@ def sort(set,k):
             break
     return result
 
-#check whether a key in a dictionary or not ( when the type of the key is a permutation)
-def check(self,dictionary):
-    find = False
-    key_0 = None
-    for key in list(dictionary.keys()):
-        if self.equal(key):
-            find = True
-            key_0 = key
-            break
-    
-    return [find,key_0]
 
-#edit a dictionary ( when the type of the key is a permutation)
+
+def combine_dict(self,*other):
+    result = self.copy()
+    for dictionary in other:
+        for key in dictionary:
+            edit(key,dictionary[key],result)
+    return result
+
+def constant_mul(self,constant):
+    for key in self:
+        self[key] = constant * self[key]
+    return self
+
+
+
+
+#edit a dictionary (when the type of the key is a permutation)
 def edit(key,value,dictionary):
-    if check(key,dictionary)[0]:
-        dictionary[check(key,dictionary)[1]] += value
+    if key in dictionary:
+        dictionary[key] += value
     else: 
         dictionary[key] = value
     return 

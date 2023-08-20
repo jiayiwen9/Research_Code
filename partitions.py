@@ -11,10 +11,27 @@ class Partition:
         for i in range(self.length):
             for j in range(self.array[i]):
                 self.diagram.add((i+1,i+1+j))
+
+    def __repr__(self) -> str:
+        return str(self.array)
         
     def is_strict(self):
         for i in range(self.length-1):
             assert self.array[i]>self.array[i+1]
+
+    #generator function for all strict partitions of n
+    @classmethod
+    def all_strict(cls, n, max_part=None):
+        if max_part is None:
+            max_part = n
+
+        if n == 0:
+            yield Partition([])
+        else:
+            for i in range(1, 1 + min(max_part, n)):
+                for p in cls.all_strict(n - i, i - 1):
+                    parts = [i] + p.array
+                    yield Partition(parts)
 
     def go_polynomial(self): 
         self.is_strict()
@@ -36,6 +53,35 @@ class Partition:
                     poly1 = polynomial_coefficients(poly1,poly2)
 
             return(poly1)
+        
+    def go_coeff(self):
+        self.is_strict()
+        if len(self.diagram) == 0:
+            return None
+        a= monomial_expansion([1])
+        b = monomial_expansion([1,1])
+        result = combine_dict(a,a,b)
+        if len(self.diagram) == 1:
+            return result
+        if len(self.diagram) >1:
+            for (i,j) in self.diagram:
+                temp = result.copy()
+                if i==1 and j==1:
+                    continue
+                else:
+                    result = {}
+                    for key in temp.keys():
+                        part1 = constant_mul(monomial_expansion([i],key),temp[key])
+                        part2 = constant_mul(monomial_expansion([j],key),temp[key])
+                        part3 = constant_mul(monomial_expansion([i,j],key),temp[key])
+                        result = combine_dict(result,part1,part2,part3)
+            new_dict ={}
+            for key,value in result.items():
+                if value !=0:
+                    new_dict[key] = value
+            return new_dict
+
+
 
 def polynomial_coefficients(poly1,poly2):
     """
@@ -90,5 +136,8 @@ def grothendieck_coeff(polynomial):
     
     return new_dict 
 
+Partition([2]).go_coeff()
+
+################
 #grothendieck_coeff(Partition([1]).go_polynomial())
 #{ 2 1: 2,  3 1 2: 1}
