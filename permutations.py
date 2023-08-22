@@ -10,6 +10,7 @@ class Permutation:
         if len(array) > 0:
             count = len(array)-1
             while count > -1:
+                assert array[count] >0
                 self.map[count+1] = array[count]
                 count -= 1
 
@@ -45,7 +46,15 @@ class Permutation:
         return self.map[number]
     
     def size(self):
-        return max(self.map)
+        max_value =1
+        for key in self.map:
+            if self.evaluate(key) != key:
+                max_value = max(max_value,key) 
+        
+        if max_value == 1:
+            return 0 
+        else:
+            return max_value
 
     
     # inversions of the permutation
@@ -138,7 +147,7 @@ class Permutation:
     # w = v (a_1,k )(a_2, k ) ... (a_p,k) (k,b_1)... (k,b_q)
     # where a_p < ... < a_1 < b_q < ... < b_1
     # and l(w) = l(v) + p+q, and each transposition only increase the length by 1
-    
+
     def p_set(self, k):
         result = []
         for subset in powerset(k,max(k+1,self.range+1)):
@@ -157,6 +166,33 @@ class Permutation:
             if find == True:
                 result.append([new_perm,count])    
         return result    
+    
+    def inc_subseq(self):
+        result =[]
+        if self.size() > 0:
+            result.append([self.evaluate(1)])
+            current = 0
+            for i in range(2,self.size()+1):
+                if self.evaluate(i) > self.evaluate(i-1):
+                    result[current].append(self.evaluate(i))
+                else:
+                    current += 1
+                    result.append([self.evaluate(i)])
+        return result
+    
+    def cba_check(self):
+        index = self.inverse().evaluate(self.size())
+        if index +2 > self.size():
+            return False
+        else:
+            return self.evaluate(index)> self.evaluate(index+1) and self.evaluate(index+1)>self.evaluate(index+2)
+        
+    def cab_check(self):
+        index = self.inverse().evaluate(self.size())
+        if index +2 > self.size():
+            return False
+        else:
+            return self.evaluate(index)> self.evaluate(index+2) and self.evaluate(index+2)>self.evaluate(index+1)
 
 def powerset(k,max):
     # return all subsets of {1,2, ...,k-1,k+1,... , max}

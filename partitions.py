@@ -81,6 +81,14 @@ class Partition:
                     new_dict[key] = value
             return new_dict
 
+    # return the coeff indexed by the inverse of permutation
+    def go_coeff_inv(self):
+        temp = self.go_coeff()
+        result = {}
+        for key in temp:
+            result[key.inverse()]= temp[key]
+
+        return result
 
 
 def polynomial_coefficients(poly1,poly2):
