@@ -150,7 +150,7 @@ class Permutation:
 
     def p_set(self, k):
         result = []
-        for subset in powerset(k,max(k+1,self.range+1)):
+        for subset in powerset_alt(k,max(k+1,self.range+1)):
             new_perm = self
             count =0
             find = True
@@ -204,6 +204,12 @@ def powerset(k,max):
         result.append(sort(element,k))
     return result
 
+# improving the computation of powerset
+def powerset_alt(k,max):
+    iter1 = list(reversed(range(1,k)))
+    iter1.extend(list(reversed(range(k+1,max+1))))
+    result = list(chain.from_iterable(combinations(iter1,r) for r in range(len(iter1)+1)))
+    return result 
 
 def sort(set,k):
     result = list(reversed(set))
@@ -233,7 +239,6 @@ def constant_mul(self,constant):
 
 
 
-#edit a dictionary (when the type of the key is a permutation)
 def edit(key,value,dictionary):
     if key in dictionary:
         dictionary[key] += value
