@@ -150,7 +150,7 @@ class Permutation:
 
     def p_set(self, k):
         result = []
-        for subset in powerset_alt(k,max(k+1,self.range+1)):
+        for subset in powerset(k,max(k+1,self.range+1)):
             new_perm = self
             count =0
             find = True
@@ -194,35 +194,13 @@ class Permutation:
         else:
             return self.evaluate(index)> self.evaluate(index+2) and self.evaluate(index+2)>self.evaluate(index+1)
 
+
 def powerset(k,max):
     # return all subsets of {1,2, ...,k-1,k+1,... , max}
-    iterable = list(range(1,max+1))
-    iterable.pop(k-1)
-    temp=  list(chain.from_iterable(combinations(iterable, r) for r in range(len(iterable)+1)) )
-    result = []
-    for element in temp:
-        result.append(sort(element,k))
-    return result
-
-# improving the computation of powerset
-def powerset_alt(k,max):
     iter1 = list(reversed(range(1,k)))
     iter1.extend(list(reversed(range(k+1,max+1))))
     result = list(chain.from_iterable(combinations(iter1,r) for r in range(len(iter1)+1)))
     return result 
-
-def sort(set,k):
-    result = list(reversed(set))
-    for i in set: 
-        if i >k:
-            first_list = set[:set.index(i)]
-            second_list = set[set.index(i):]
-            result = list(reversed(first_list))
-            result.extend(list(reversed(second_list)))
-            break
-    return result
-
-
 
 def combine_dict(self,*other):
     result = self.copy()
