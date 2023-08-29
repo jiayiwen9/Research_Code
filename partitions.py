@@ -58,8 +58,10 @@ class Partition:
         
     def go_coeff(self):
         self.is_strict()
+        
         if len(self.diagram) == 0:
             return None
+        
         a= monomial_expansion([1])
         b = monomial_expansion([1,1])
         result = combine_dict(a,a,b)
@@ -67,16 +69,13 @@ class Partition:
             return result
         if len(self.diagram) >1:
             for (i,j) in self.diagram:
-                temp = result.copy()
                 if i==1 and j==1:
                     continue
                 else:
-                    result = {}
-                    for key in temp.keys():
-                        part1 = constant_mul(monomial_expansion([i],key),temp[key])
-                        part2 = constant_mul(monomial_expansion([j],key),temp[key])
-                        part3 = constant_mul(monomial_expansion([i,j],key),temp[key])
-                        result = combine_dict(result,part1,part2,part3)
+                    part1 = mono_exp_multiple_input(i,result)
+                    part2 = mono_exp_multiple_input(j,result)
+                    part3 = mono_exp_multiple_input(j,part1)
+                    result = combine_dict(part1,part2,part3)
             new_dict ={}
             for key,value in result.items():
                 if value !=0:
@@ -91,8 +90,10 @@ class Partition:
         for key in temp:
             result[key.inverse()]= temp[key]
         print("--- %s seconds ---" % (time.time() - start_time))
-        return result
+        return result    
 
+    def go_coeff_inv_sorted(self):
+        return sorted(self.go_coeff_inv().items(), key=lambda x: x[1])
 
 def polynomial_coefficients(poly1,poly2):
     """

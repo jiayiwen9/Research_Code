@@ -263,4 +263,25 @@ def monomial_expansion(array,permutation = Permutation([1])):
     
     return new_dict
 
+def mono_exp_multiple_input(index,poly = {Permutation([1]):1}):
+    result ={}
+    for key in poly:
+        part1 = constant_mul(monomial_expansion([index],key),poly[key])
+        result = combine_dict(result,part1)
+    new_dict ={}
+    for key,value in result.items():
+        if value !=0:
+            new_dict[key] = value
+    return new_dict
+    
+
+
+def monomial_expansion_inv(array, permutation = Permutation([1])):
+    temp = monomial_expansion(array,permutation.inverse())
+    result = {}
+    for key in temp:
+        result[key.inverse()] = temp[key]
+    return result
+
+
 #monomial_expansion([3,2,1]) expected { 2 3 4 1 :1}

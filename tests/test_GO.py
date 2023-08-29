@@ -5,7 +5,13 @@ from partitions import *
 def test_gcoeff(n):
     for i in range(1,n+1):
         for par in Partition.all_strict(i):
-            assert grothendieck_coeff(par.go_polynomial()) == par.go_coeff()
+            print(par)
+            assert par.go_coeff_test() == par.go_coeff()
+
+def test_gcoef(n):
+    for i in range(1,n+1):
+        print(i)
+        assert Partition([i]).go_coeff_test() == Partition([i]).go_coeff()
 
 def generate_type1(n):
     for i in range(1,n+1):
