@@ -148,8 +148,13 @@ def grothendieck_coeff(polynomial):
     
     return new_dict 
 
-Partition([2]).go_coeff()
 
+def count_coeff(self):
+    max_value = max(self.values())
+    result = [0]*max_value
+    for key in self:
+        result[self[key]-1] +=1
+    return result 
 ################
 #grothendieck_coeff(Partition([1]).go_polynomial())
 #{ 2 1: 2,  3 1 2: 1}

@@ -23,22 +23,36 @@ def generate_type2(n):
         print("Partition: ["+str(i)+", "+str(i-1) +"]")
         print(Partition([i,i-1]).go_coeff())
 
-def test_type1(n,start =3):
-    for i in range(start,n+1):
-        print(i)
-        dict = Partition([i]).go_coeff_inv()
-        for key in dict:
-            assert key.size() == i+2 or key.size() ==i+1
-            print(key)
-            if key.size() == i+2 :
-                assert dict[key] == 1
-            else:
-                if key.cab_check() and len(key.inc_subseq())>2:     
-                    assert dict[key] == 1
-                if len(key.inc_subseq()) == 2:
-                    assert key.inc_subseq()[0][-1] == i+1
-                    assert dict[key] == 2
-                if key.cba_check() and len(key.inc_subseq())>2:      
-                    assert dict[key] == 3
+
+def test_equiv_class(n):
+    for i in range(5,n+1):
+        print([i,1])
+        par = Partition([i,1])
+        result_by_class =  par_by_equiv_re(par.go_coeff_inv_sorted())
+
+        
+        tail = []
+        for i in range(5,i+1):
+            tail.append(i)
+        
+        rep1 = [i+1,3,4,1,2] + tail
+        rep2 = [i+1,2,3,1,4] + tail
+        count1 = 0 
+        count3 = 0 
+        for cls in result_by_class:
+            if cls[0][0].equiv_check(Permutation(rep1)):
+                equiv_cls = Permutation(rep1).equiv_class()
+                expect=[]
+                for item in equiv_cls: 
+                    if item.inverse().evaluate(3)<item.inverse().evaluate(4):
+                        expect.append(item)
+                assert len(expect) == len(cls),cls[0][0]
+            if cls[0][0].equiv_check(Permutation(rep2)):
+                assert len(cls) == len(Permutation(rep2).equiv_class()), cls[0][0]
+            if len(cls) == 3:
+                count3+=1
+            if len(cls) == 1:
+                count1+=1
+        assert count3 ==1 and count1 == 2*i-5, count1
 
 

@@ -6,7 +6,6 @@ class Permutation:
         # A dictionary is used to record the bijection
         self.map = {}
         self.array = array
-        self.range = len(array)
         if len(array) > 0:
             count = len(array)-1
             while count > -1:
@@ -150,7 +149,7 @@ class Permutation:
 
     def p_set(self, k):
         result = []
-        for subset in powerset(k,max(k+1,self.range+1)):
+        for subset in powerset(k,max(k+1,self.size()+1)):
             new_perm = self
             count =0
             find = True
@@ -179,20 +178,33 @@ class Permutation:
                     current += 1
                     result.append([self.evaluate(i)])
         return result
-    
-    def cba_check(self):
-        index = self.inverse().evaluate(self.size())
-        if index +2 > self.size():
-            return False
-        else:
-            return self.evaluate(index)> self.evaluate(index+1) and self.evaluate(index+1)>self.evaluate(index+2)
+
+    def equiv_class(self):
+        result= []
+
+        def help(self):
+            if self in result:
+                return
+            result.append(self)
+            max_range = self.size()-2
+            for i in range(1,max_range+1):
+                max_value = max(self.evaluate(i),self.evaluate(i+1),self.evaluate(i+2))
+                min_value = min(self.evaluate(i),self.evaluate(i+1),self.evaluate(i+2))
+                if self.evaluate(i) == min_value or self.evaluate(i+2) == max_value:
+                    continue
+                else: 
+                    if min_value != self.evaluate(i+1) and self.act(i) not in result:
+                        help(self.act(i))
+                    if max_value != self.evaluate(i+1) and self.act(i+1) not in result:
+                        help(self.act(i+1))
         
-    def cab_check(self):
-        index = self.inverse().evaluate(self.size())
-        if index +2 > self.size():
-            return False
-        else:
-            return self.evaluate(index)> self.evaluate(index+2) and self.evaluate(index+2)>self.evaluate(index+1)
+        help(self)
+        return result
+                            
+
+
+    def equiv_check(self,other):
+        return other in self.equiv_class()
 
 
 def powerset(k,max):
@@ -283,5 +295,39 @@ def monomial_expansion_inv(array, permutation = Permutation([1])):
         result[key.inverse()] = temp[key]
     return result
 
+## this method is only for output and returns None
+def par_by_equiv(array): 
+    partition_result = []
+    for item in array:
+        if partition_result == []:
+             partition_result.append([item])
+        else:
+            indicator = False
+            for i in partition_result:
+                if i[0][0].equiv_check(item[0]):
+                    i.append(item)
+                    indicator = True
+                    break
+            if indicator == False:
+                partition_result.append([item])
 
+    for i in partition_result:
+        print(i)
+# this is the same method but return an array instead
+def par_by_equiv_re(array): 
+    partition_result = []
+    for item in array:
+        if partition_result == []:
+             partition_result.append([item])
+        else:
+            indicator = False
+            for i in partition_result:
+                if i[0][0].equiv_check(item[0]):
+                    i.append(item)
+                    indicator = True
+                    break
+            if indicator == False:
+                partition_result.append([item])
+
+    return partition_result
 #monomial_expansion([3,2,1]) expected { 2 3 4 1 :1}
