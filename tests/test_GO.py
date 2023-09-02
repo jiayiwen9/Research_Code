@@ -1,29 +1,6 @@
 from permutations import *
 from partitions import *
 
-    
-def test_gcoeff(n):
-    for i in range(1,n+1):
-        for par in Partition.all_strict(i):
-            print(par)
-            assert par.go_coeff_test() == par.go_coeff()
-
-def test_gcoef(n):
-    for i in range(1,n+1):
-        print(i)
-        assert Partition([i]).go_coeff_test() == Partition([i]).go_coeff()
-
-def generate_type1(n):
-    for i in range(1,n+1):
-        print("Partition: ["+str(i) +"]")
-        print(Partition([i]).go_coeff())
-
-def generate_type2(n):
-    for i in range(1,n+1):
-        print("Partition: ["+str(i)+", "+str(i-1) +"]")
-        print(Partition([i,i-1]).go_coeff())
-
-
 def test_equiv_class(n):
     for i in range(5,n+1):
         print([i,1])
@@ -49,9 +26,13 @@ def test_equiv_class(n):
                 assert len(expect) == len(cls),cls[0][0]
             if cls[0][0].equiv_check(Permutation(rep2)):
                 assert len(cls) == len(Permutation(rep2).equiv_class()), cls[0][0]
+                for item in cls:
+                    assert item[1] >3, item[1]
             if len(cls) == 3:
+                assert cls[0][1] == 1 or cls[0][1] == 2, cls[0][1]
                 count3+=1
             if len(cls) == 1:
+                assert cls[0][1] == 1 or cls[0][1] == 2, cls[0][1]
                 count1+=1
         assert count3 ==1 and count1 == 2*i-5, count1
 
