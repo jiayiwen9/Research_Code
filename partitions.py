@@ -26,6 +26,9 @@ class Partition:
         for i in range(self.length-1):
             assert self.array[i]>self.array[i+1]
 
+    def length(self):
+        return self.length
+
     #generator function for all strict partitions of n
     @classmethod
     def all_strict(cls, n, max_part=None):
@@ -41,7 +44,7 @@ class Partition:
                     yield Partition(parts)
         
     def go_coeff(self):
-        self.is_strict()
+        #self.is_strict()
         
         if len(self.diagram) == 0:
             return None
