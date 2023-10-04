@@ -4,6 +4,7 @@ import time
 
 
 class Partition:
+    memory = {}
     def __init__(self,array):
         self.length = len(array)
         self.array = array
@@ -18,6 +19,9 @@ class Partition:
     
     def __eq__(self, __value: object) -> bool:
         return self.array == __value.array
+    
+    def __hash__(self):
+        return hash(str(self))
 
     def arr(self):
         return self.array
@@ -26,8 +30,24 @@ class Partition:
         for i in range(self.length-1):
             assert self.array[i]>self.array[i+1]
 
-    def length(self):
+    def __len__(self):
+        # number of rows 
         return self.length
+    
+    def size(self):
+        # if self is partition of n, then return n 
+        return len(self.diagram)
+    
+    def contain(self,other):
+        # whether self contains other
+        if self.size()< other.size() or len(self)<len(other) or self.size()==0:
+            return False
+        else:
+            result = True
+            for i in range(len(other)):
+                temp = self.arr()[i]>other.arr()[i] or self.arr()[i] == other.arr()[i]
+                result = result and temp
+                return result
 
     #generator function for all strict partitions of n
     @classmethod
@@ -44,21 +64,35 @@ class Partition:
                     yield Partition(parts)
         
     def go_coeff(self):
-        #self.is_strict()
-        
+        self.is_strict()
         if len(self.diagram) == 0:
             return None
-        
-        a= monomial_expansion([1])
-        b = monomial_expansion([1,1])
-        result = combine_dict(a,a,b)
         if len(self.diagram) == 1:
-            return result
-        if len(self.diagram) >1:
+            return Partition.memory[Partition([1])]
+ 
+        if self in Partition.memory:
+            return Partition.memory[self]
+        
+        else:
+            temp_arr = self.arr().copy()
+            counter = 0
+            for i in range(len(self)-1):
+                if temp_arr[i]-1 > temp_arr[i+1]:
+                    counter = i 
+                    break
+            counter = len(self)-1
+            
+            temp_arr[counter] -=1
+            if temp_arr[counter] == 0:
+                temp_par = Partition(temp_arr[:-1])
+            else:
+                temp_par = Partition(temp_arr)  
+            
+
+            result=temp_par.go_coeff()
+
             for (i,j) in self.diagram:
-                if i==1 and j==1:
-                    continue
-                else:
+                if (i,j) not in temp_par.diagram:
                     part1 = mono_exp_multiple_input(i,result)
                     part2 = mono_exp_multiple_input(j,result)
                     part3 = mono_exp_multiple_input(j,part1)
@@ -81,6 +115,10 @@ class Partition:
 
     def go_coeff_inv_sorted(self):
         return sorted(self.go_coeff_inv().items(), key=lambda x: x[1])
+a= monomial_expansion_multiple_input([1])            
+b = monomial_expansion_multiple_input([1,1])
+result = combine_dict(a,a,b)
+Partition.memory[Partition([1])] = result
 
 
 # count the number of terms in each coefficient.
