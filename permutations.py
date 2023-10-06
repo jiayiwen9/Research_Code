@@ -1,8 +1,9 @@
-import numpy 
 from itertools import chain, combinations
 
 class Permutation:
+    memory = {}
     def __init__(self, array=[1]):
+        # input is the one-line notation
         # A dictionary is used to record the bijection
         self.map = {}
         self.array = array
@@ -10,15 +11,9 @@ class Permutation:
             count = len(array)-1
             while count > -1:
                 assert array[count] >0
+                assert array[count] not in self.map.values(),array
                 self.map[count+1] = array[count]
                 count -= 1
-
-    def inverse(self):
-        array = list(range(1, self.size() + 1))
-        for i in range(1, self.size() + 1):
-            a = self.evaluate(i)
-            array[a - 1] = i
-        return Permutation(array)
 
     def __repr__(self) -> str:
             #print the oneline notation of the permutation
@@ -39,9 +34,9 @@ class Permutation:
     def __hash__(self):
         return hash(str(self))
         
-    # the image of a number under the permutation
-    def evaluate(self, number):
     
+    def evaluate(self, number):
+        # the image of a number under the permutation
         return self.map[number]
     
     def size(self):
@@ -55,10 +50,17 @@ class Permutation:
         else:
             return max_value
 
+    def inverse(self):
+    # the inverse of given permutation
+        array = list(range(1, self.size() + 1))
+        for i in range(1, self.size() + 1):
+            a = self.evaluate(i)
+            array[a - 1] = i
+        return Permutation(array)
+
     
-    # inversions of the permutation
     def inversion(self):
-        
+    # the number of inversions for a given permutation
         inv = 0
         count = len(self.map)
         while count > -1:
@@ -68,17 +70,17 @@ class Permutation:
             count -= 1
         return inv
     
-    ##### a method to generate all reduced word for a permutation
+    def generate_word(self):
+    # a method to generate all reduced word for a permutation
     #####################       Testing  Code #########################
     # from permutations import *
     # a=Permutation([4,2,3,1]) 
     # a.generate_word()
     ###################################################################
-    def generate_word(self):
-    
+        
         word_list = []
         max = self.size()
-        
+    
         #help function
         def help_fn(perm, current):
             
@@ -99,58 +101,67 @@ class Permutation:
             help_fn(self,[])
         return word_list
     
-    ## acting on the permutation by (i,j)
     def act(self,i,j=None):
         if j == None:
-            j= i+1
-        new_perm = self.array.copy()
-        
-        if i==j:
-            return self
+                j= i+1
         # make i < j 
         if i > j:
             temp = i
             i = j 
             j = temp 
-        
-        if j> len(new_perm):
-            if i< len(new_perm) or i == len(new_perm):
-                temp = new_perm[i-1]
-                new_perm[i-1] = j
-                for k in range(len(new_perm),j-1):
-                    new_perm.insert(k,k)
-                new_perm.insert(j-1,temp)
-                return Permutation(new_perm)
-            else:
-                extra = list(range(len(new_perm)+1,j+1))
-                new_perm.extend(extra)
-                new_perm[i-1]= j
-                new_perm[j-1] = i
-                return Permutation(new_perm)
-        else:
-            assert i < len(new_perm)+1
-            temp = new_perm[i-1]
-            new_perm[i-1] = new_perm [j-1]
-            new_perm[j-1]=temp
-
+    # acting on the permutation by (i,j)
+        if self.size()==0:
+            new_perm = list(range(1,i))
+            new_perm.append(j)
+            new_perm.extend(list(range(i+1,j)))
+            new_perm.append(i)
             return Permutation(new_perm)
+        else:
+            new_perm = []
+            for index in range(self.size()):
+                new_perm.append(self.evaluate(index+1))
+            
+            if i==j:
+                return self
+            else:
+                if j not in new_perm:
+                    if i not in new_perm:
+                        new_perm.extend(list(range(len(new_perm)+1,i)))
+                        new_perm.append(j)
+                        new_perm.extend(list(range(i+1,j)))
+                        new_perm.append(i)
+                        return Permutation(new_perm)
+                    else:
+                        temp=new_perm[i-1]
+                        new_perm[i-1] = j
+                        new_perm.extend(list(range(len(new_perm)+1,j)))
+                        new_perm.append(temp)
+                        #new_perm = new_perm[:i-1]+[j]+new_perm[i:]+list(range(len(new_perm)+1,j))+[new_perm[i-1]]
+                        return Permutation(new_perm)
+                else:
+                    temp = new_perm[i-1]
+                    new_perm[i-1]=new_perm[j-1]
+                    new_perm[j-1]=temp
+                    return Permutation(new_perm)
 
     def act_sequence(self, array):
+        # act by a word 
         temp = self.copy()
         for i in array:
             temp = temp.act(i)
-
         return temp
+    
+    
+
+    def p_set(self, k):
     # a function to compute P_k(v) 
     # i.e. the set of all permutations of the form 
     # w = v (a_1,k )(a_2, k ) ... (a_p,k) (k,b_1)... (k,b_q)
     # where a_p < ... < a_1 < b_q < ... < b_1
     # and l(w) = l(v) + p+q, and each transposition only increase the length by 1
-
-    def p_set(self, k):
         result = []
         for subset in powerset(k,max(k+1,self.size()+1)):
-            new_perm = self
+            new_perm = self.copy()
             count =0
             find = True
             for i in subset: 
@@ -167,6 +178,7 @@ class Permutation:
         return result    
     
     def inc_subseq(self):
+        # partition the one line notation into increasing subsequence 
         result =[]
         if self.size() > 0:
             result.append([self.evaluate(1)])
@@ -180,6 +192,9 @@ class Permutation:
         return result
 
     def equiv_class(self):
+        # output is the equivalence class of the given permutation
+        # c>b>a
+        # cba~cab~bca
         result= []
 
         def help(self):
@@ -204,6 +219,7 @@ class Permutation:
 
 
     def equiv_check(self,other):
+        # check equivalence relation 
         return other in self.equiv_class()
 
 
@@ -222,9 +238,10 @@ def combine_dict(self,*other):
     return result
 
 def constant_mul(self,constant):
+    result = self.copy()
     for key in self:
-        self[key] = constant * self[key]
-    return self
+        result[key] = constant * result[key]
+    return result
 
 
 
@@ -238,47 +255,57 @@ def edit(key,value,dictionary):
         
 
 # expansion of a monomial as grothendieck basis
-# input is an array representing the subscripts of the monomial
+
 # output is a dictionary where the keys are Permutations and the value is the coefficient
-def monomial_expansion(array,permutation = Permutation([1])):
-    dict={}
+def monomial_expansion(index,permutation = Permutation([1])):
+    temp = (index,permutation)
+    if temp not in Permutation.memory:
+        dict={}
+        for pair in permutation.p_set(index)[1:]:
+            #  negative coeff
+            if pair[1]% 2 == 1:
+                edit(pair[0],-1,dict)
+            # positive coeff
+            if pair[1]% 2 ==0:
+                edit(pair[0],1,dict)
+        Permutation.memory[temp]=dict
+        
+    return Permutation.memory[temp]
+
+def monomial_expansion_multiple_input(array,permutation = Permutation([1])):
+# same function but allows multiple input (i.e an array representing the subscripts of the monomial)
+    result={}
     if len(array) == 0:
         return {permutation :1}
+    
     def help_fn(array,current):
-        
         if len(array) == 0:
             for key in current.keys():
-                edit(key,current[key],dict)
+                edit(key,current[key],result)
             return
         else:
             k = array[0]
             for key in current.keys():
                 value = current[key]
                 new = {}
-                for pair in key.p_set(k)[1:]:
-                    #  negative coeff
-                    if pair[1]% 2 == 1:
-                        edit(pair[0],-value,new)
-                    # positive coeff
-                    if pair[1]% 2 ==0:
-                        edit(pair[0],value,new)
+                temp1=monomial_expansion(k,key)
+                new=combine_dict(new,constant_mul(temp1,value))
                 help_fn(array[1:],new)
             return
-
+        
     if len(array) != 0:
         help_fn(array,{permutation:1})
-    new_dict ={}
-    for key,value in dict.items():
-        if value !=0:
-            new_dict[key] = value
-   
     
+    new_dict ={}
+    for key,value in result.items():
+        if value !=0:
+            new_dict[key] = value 
     return new_dict
 
 def mono_exp_multiple_input(index,poly = {Permutation([1]):1}):
     result ={}
     for key in poly:
-        part1 = constant_mul(monomial_expansion([index],key),poly[key])
+        part1 = constant_mul(monomial_expansion(index,key),poly[key])
         result = combine_dict(result,part1)
     new_dict ={}
     for key,value in result.items():
@@ -289,7 +316,7 @@ def mono_exp_multiple_input(index,poly = {Permutation([1]):1}):
 
 
 def monomial_expansion_inv(array, permutation = Permutation([1])):
-    temp = monomial_expansion(array,permutation.inverse())
+    temp = monomial_expansion_multiple_input(array,permutation.inverse())
     result = {}
     for key in temp:
         result[key.inverse()] = temp[key]
@@ -330,4 +357,4 @@ def par_by_equiv_re(array):
                 partition_result.append([item])
 
     return partition_result
-#monomial_expansion([3,2,1]) expected { 2 3 4 1 :1}
+
