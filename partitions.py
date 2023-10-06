@@ -1,4 +1,3 @@
-import numpy
 from permutations import *
 import time
 

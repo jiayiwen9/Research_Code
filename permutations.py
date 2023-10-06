@@ -1,4 +1,3 @@
-import numpy 
 from itertools import chain, combinations
 
 class Permutation:
