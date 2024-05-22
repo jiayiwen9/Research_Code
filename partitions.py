@@ -12,12 +12,14 @@ class Partition:
         for i in range(self.length):
             for j in range(self.array[i]):
                 self.diagram.add((i+1,i+1+j))
-
     def __repr__(self) -> str:
-        return str(self.array)
+        if self.array != None:
+            return str(self.array)
+        else: 
+            return str(self.diagram)
     
     def __eq__(self, __value: object) -> bool:
-        return self.array == __value.array
+        return self.diagram == __value.diagram  
     
     def __hash__(self):
         return hash(str(self))
@@ -47,6 +49,13 @@ class Partition:
                 temp = self.arr()[i]>other.arr()[i] or self.arr()[i] == other.arr()[i]
                 result = result and temp
                 return result
+    # a method that returns the diagram
+    def diag(self):
+        d = self.diagram.copy()
+        return d
+    
+
+
 
     #generator function for all strict partitions of n
     @classmethod
@@ -63,14 +72,20 @@ class Partition:
                     yield Partition(parts)
         
     def go_coeff(self):
-        self.is_strict()
+        #self.is_strict()
         if len(self.diagram) == 0:
             return None
-        if len(self.diagram) == 1:
-            return Partition.memory[Partition([1])]
- 
         if self in Partition.memory:
             return Partition.memory[self]
+        if len(self.diagram) == 1:
+            i,j = self.diagram.copy().pop()
+            a= monomial_expansion_multiple_input([i])                 
+            c= monomial_expansion_multiple_input([j])                 
+            b = monomial_expansion_multiple_input([i,j])            
+            result = combine_dict(a,c,b)
+            Partition.memory[self] = result
+            return Partition.memory[self]
+ 
         
         else:
             temp_arr = self.arr().copy()
@@ -100,6 +115,8 @@ class Partition:
             for key,value in result.items():
                 if value !=0:
                     new_dict[key] = value
+
+            Partition.memory[self] = new_dict
             return new_dict
 
     # return the coeff indexed by the inverse of permutation
@@ -112,12 +129,16 @@ class Partition:
         print("--- %s seconds ---" % (time.time() - start_time))
         return result    
 
+    def go_coeff_sorted(self):
+        return sorted(self.go_coeff().items(), key=lambda x: x[1])
     def go_coeff_inv_sorted(self):
         return sorted(self.go_coeff_inv().items(), key=lambda x: x[1])
+'''
 a= monomial_expansion_multiple_input([1])            
 b = monomial_expansion_multiple_input([1,1])
 result = combine_dict(a,a,b)
 Partition.memory[Partition([1])] = result
+'''
 
 
 # count the number of terms in each coefficient.
@@ -129,6 +150,79 @@ def count_coeff(self):
     return result 
 ################
 
+class Vertical_strip(Partition):
+
+    def __init__(self, n = 0,shift =1 ):
+        super(Vertical_strip,self).__init__([])
+        self.array = None
+        if n ==0:
+            self.diagram = None
+        else: 
+            for i in range(1,n+1):
+                self.diagram.add((shift,i))
+            
+    
+    @classmethod
+    def diagram_construct(cls,diagram = None):
+        obj = cls()
+        obj.array = None
+        obj.diagram = diagram
+        return obj
+    
+    def go_coeff(self):
+        #self.is_strict()
+        if len(self.diagram) == 0:
+            return None
+        if self in Partition.memory:
+            return Partition.memory[self]
+        if len(self.diagram) == 1:
+            i,j = self.diagram.copy().pop()
+            a= monomial_expansion_multiple_input([i])                 
+            c= monomial_expansion_multiple_input([j])                 
+            b = monomial_expansion_multiple_input([i,j])            
+            result = combine_dict(a,c,b)
+            
+            new_dict ={}
+            for key,value in result.items():
+                if value !=0:
+                    new_dict[key] = value
+            Partition.memory[self] = new_dict
+            return Partition.memory[self]
+ 
+        
+        else:
+            temp_diagram = self.diagram.copy()
+            temp_diagram.pop()
+            temp_par = Vertical_strip.diagram_construct(temp_diagram)
+
+            result=temp_par.go_coeff()
+
+            for (i,j) in self.diagram:
+                if (i,j) not in temp_par.diagram:
+                    part1 = mono_exp_multiple_input(i,result)
+                    part2 = mono_exp_multiple_input(j,result)
+                    part3 = mono_exp_multiple_input(j,part1)
+                    result = combine_dict(part1,part2,part3)
+            new_dict ={key:value for key,value in result.items() if value!=0}
+            Partition.memory[self] = new_dict
+            return new_dict
+    
+
+class Square_shape(Partition):
+    def __init__(self, n):
+        array = []
+        for i in reversed(range(1,n+1)):
+            array.append(i)
+        super().__init__(array)
+    
+    def go_coeff_sorted(self):
+        list = sorted(self.go_coeff().items(), key=lambda x: x[1])
+        new_list = []
+        for pair in list: 
+            item  = (pair[0].convert_to_partition(),pair[1])
+            new_list.append(item)
+
+        return new_list
 '''
 Partition([8]).go_coeff_inv()
 

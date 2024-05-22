@@ -16,11 +16,8 @@ class Permutation:
                 count -= 1
 
     def __repr__(self) -> str:
-            #print the oneline notation of the permutation
-            oneline = ''
-            for num in self.array:
-                oneline += ' '+ str(num)
-            return oneline
+            
+            return str(self.array)
     
     def copy(self):
         return Permutation(self.array)
@@ -69,7 +66,49 @@ class Permutation:
                     inv += 1
             count -= 1
         return inv
+
+
+    def descent(self):
+        # return an array of descent indices
+        descent_set = []
+        for i in range(1,self.size()):
+            if self.evaluate(i) > self.evaluate(i+1):
+                descent_set.append(i)
+
+        return descent_set
     
+    def count_descent(self):
+        # the number of descent i.e. how many 0<i < n-1 such that w(i)>w(i+1)
+        # count = 0 
+
+        
+        # for i in range(1,self.size()):
+        #     if self.evaluate(i) > self.evaluate(i+1):
+        #         count +=1
+        return len(self.descent())
+
+
+    def is_grassmannian(self): 
+        if self.count_descent() ==1 or self.count_descent() ==0:
+            return True
+        else:
+            return False
+
+    def convert_to_partition(self):
+        assert self.is_grassmannian() is True
+        if self.count_descent() ==0:
+            return []
+        else:
+            max =  self.descent()[0]
+            par = []
+            for i in reversed(range(1,max+1)):
+                par.append(self.evaluate(i)-i)
+            return par
+
+
+
+        
+
     def generate_word(self):
     # a method to generate all reduced word for a permutation
     #####################       Testing  Code #########################
@@ -95,10 +134,11 @@ class Permutation:
                         help_fn(perm.act(i),new_current)
                 return
         
-
-
         if self.inversion() != 0:
             help_fn(self,[])
+        
+        for word in word_list:
+            word.reverse()
         return word_list
     
     def act(self,i,j=None):
@@ -302,6 +342,7 @@ def monomial_expansion_multiple_input(array,permutation = Permutation([1])):
             new_dict[key] = value 
     return new_dict
 
+# x_i times a polynomial with Grothendieck basis
 def mono_exp_multiple_input(index,poly = {Permutation([1]):1}):
     result ={}
     for key in poly:

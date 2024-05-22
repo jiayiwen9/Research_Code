@@ -36,4 +36,9 @@ def test_equiv_class(n):
                 count1+=1
         assert count3 ==1 and count1 == 2*i-5, count1
 
+def test_computation_result(n):
+    for i in range(1,n):
+        for par in Partition.all_strict(i):
+            #todo: add an alternative way of computing GO with method name alt_go_coeff()
+            assert par.go_coeff() == par.alt_go_coeff(), print(par)
 
