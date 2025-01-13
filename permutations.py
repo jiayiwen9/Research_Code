@@ -14,6 +14,25 @@ class Permutation:
                 assert array[count] not in self.map.values(),array
                 self.map[count+1] = array[count]
                 count -= 1
+        self.inv_map= {}
+        for key in self.map:
+            inv_key =self.map[key]
+            self.inv_map[inv_key] = key
+    
+    def diagram(self):
+        
+        if self.size() ==0:
+            return []
+        else:
+            result =[]
+            for i in range(1,self.size()+1):
+                for j in range(1,self.size()+1):
+                    if self.map[i]>j  and self.inv_map[j]>i:
+                        result.append((i,j))
+                    else:
+                        continue
+            return result
+        
 
     def __repr__(self) -> str:
             
@@ -93,6 +112,22 @@ class Permutation:
             return True
         else:
             return False
+        
+    def is_vexillary(self):
+        #2143-avoiding
+        length = self.size()
+        if length <= 3:
+            return True
+        else:
+            for i in range(1,length-2):
+                for j in range(i+1,length-1):
+                    for k in range(j+1,length):
+                        for l in range(k+1,length+1):
+                            if self.evaluate(j)<self.evaluate(i)<self.evaluate(l)<self.evaluate(k):
+                                return False
+                            else:
+                                continue
+            return True
 
     def convert_to_partition(self):
         assert self.is_grassmannian() is True
@@ -398,4 +433,3 @@ def par_by_equiv_re(array):
                 partition_result.append([item])
 
     return partition_result
-
